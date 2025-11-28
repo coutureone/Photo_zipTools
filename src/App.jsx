@@ -195,7 +195,7 @@ function App() {
             <Languages size={20} />
             <span>{lang === 'en' ? '中文' : 'English'}</span>
           </button>
-          <a href="https://github.com" target="_blank" rel="noreferrer" className="github-link" aria-label={t.github_aria}>
+          <a href="https://github.com/coutureone/Photo_zipTools" target="_blank" rel="noreferrer" className="github-link" aria-label={t.github_aria}>
             <Github size={24} />
           </a>
         </div>
