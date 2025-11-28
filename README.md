@@ -13,6 +13,7 @@
     *   Adjust **Quality** (Low to High)
     *   Set **Max File Size** (e.g., limit to 2MB)
     *   Resize dimensions (Max Width/Height)
+    *   **ID Photo Presets**: 1-inch (295x413), 2-inch (413x579) with smart cropping.
     *   Convert formats (JPG, PNG, WebP)
 *   **📦 One-Click Download**: Download compressed images individually or as a single ZIP file.
 *   **🌍 Bilingual Interface**: Seamlessly switch between English and Chinese.

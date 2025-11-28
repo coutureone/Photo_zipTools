@@ -22,7 +22,12 @@ export const translations = {
         status_done: "Done",
         status_error: "Error",
         saved: "Saved",
-        clear_all: "Clear All"
+        clear_all: "Clear All",
+        id_photo_size: "ID Photo Size",
+        size_original: "Original",
+        size_1inch: "1 Inch (295x413)",
+        size_2inch: "2 Inch (413x579)",
+        size_custom: "Custom Max Size"
     },
     zh: {
         title: "图片压缩",
@@ -47,6 +52,11 @@ export const translations = {
         status_done: "完成",
         status_error: "错误",
         saved: "节省",
-        clear_all: "清空列表"
+        clear_all: "清空列表",
+        id_photo_size: "证件照尺寸",
+        size_original: "保持原图",
+        size_1inch: "1寸 (295x413)",
+        size_2inch: "2寸 (413x579)",
+        size_custom: "自定义最大宽高"
     }
 };

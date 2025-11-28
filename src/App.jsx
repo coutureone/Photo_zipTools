@@ -9,6 +9,7 @@ function App() {
   const [files, setFiles] = useState([])
   const [isCompressing, setIsCompressing] = useState(false)
   const [lang, setLang] = useState('zh') // Default to Chinese as requested
+  const [targetSize, setTargetSize] = useState('original') // original, 1inch, 2inch, custom
   const [options, setOptions] = useState({
     maxSizeMB: 5, // Increased default to 5MB to preserve quality
     maxWidthOrHeight: 2560, // Increased default resolution
@@ -84,8 +85,63 @@ function App() {
     setFiles([])
   }
 
+  // Helper to crop and resize image to exact dimensions
+  const resizeImage = (file, width, height) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+
+        // Calculate aspect ratios
+        const sourceRatio = img.width / img.height;
+        const targetRatio = width / height;
+
+        let sx, sy, sWidth, sHeight;
+
+        if (sourceRatio > targetRatio) {
+          // Source is wider than target: crop width
+          sHeight = img.height;
+          sWidth = sHeight * targetRatio;
+          sx = (img.width - sWidth) / 2;
+          sy = 0;
+        } else {
+          // Source is taller than target: crop height
+          sWidth = img.width;
+          sHeight = sWidth / targetRatio;
+          sx = 0;
+          sy = (img.height - sHeight) / 2;
+        }
+
+        // Draw cropped image to canvas
+        ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, width, height);
+
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve(new File([blob], file.name, { type: file.type }));
+          } else {
+            reject(new Error('Canvas to Blob failed'));
+          }
+        }, file.type, 1.0); // Use max quality for intermediate step
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   const compressImage = async (fileObj) => {
     try {
+      let fileToCompress = fileObj.original;
+
+      // Handle ID Photo Resizing
+      if (targetSize === '1inch') {
+        fileToCompress = await resizeImage(fileToCompress, 295, 413);
+      } else if (targetSize === '2inch') {
+        fileToCompress = await resizeImage(fileToCompress, 413, 579);
+      }
+
       // Dynamic configuration based on file size to preserve clarity
       // If the file is smaller than maxSizeMB, we prioritize quality over size reduction
       let currentOptions = {
@@ -97,16 +153,22 @@ function App() {
         }
       }
 
+      // If we resized for ID photo, we don't want browser-image-compression to resize again
+      // unless the user specifically set a custom max width/height that is smaller (which is unlikely for ID photos)
+      if (targetSize !== 'original' && targetSize !== 'custom') {
+        delete currentOptions.maxWidthOrHeight;
+      }
+
       // If user wants high quality (>= 0.9) and file is already smaller than max size,
       // we ensure we don't aggressively downsample
-      if (fileObj.original.size / 1024 / 1024 < options.maxSizeMB) {
+      if (fileToCompress.size / 1024 / 1024 < options.maxSizeMB && targetSize === 'original') {
         // Keep dimensions if possible
-        // browser-image-compression might resize if maxWidthOrHeight is set. 
-        // We trust the user's setting, but if they haven't touched it (default), 
+        // browser-image-compression might resize if maxWidthOrHeight is set.
+        // We trust the user's setting, but if they haven't touched it (default),
         // we might want to be careful. For now, we respect the UI settings.
       }
 
-      const compressedFile = await imageCompression(fileObj.original, currentOptions)
+      const compressedFile = await imageCompression(fileToCompress, currentOptions)
 
       return {
         ...fileObj,
@@ -128,7 +190,7 @@ function App() {
     setIsCompressing(true)
 
     const newFiles = [...files]
-    // Process sequentially to avoid freezing UI on low-end devices, 
+    // Process sequentially to avoid freezing UI on low-end devices,
     // though browser-image-compression uses web workers.
     // Parallel execution is faster.
 
@@ -232,6 +294,31 @@ function App() {
             </div>
             <div className="settings">
               <div className="setting-group">
+                <label>{t.id_photo_size}</label>
+                <select
+                  value={targetSize}
+                  onChange={e => setTargetSize(e.target.value)}
+                >
+                  <option value="original">{t.size_original}</option>
+                  <option value="1inch">{t.size_1inch}</option>
+                  <option value="2inch">{t.size_2inch}</option>
+                  <option value="custom">{t.size_custom}</option>
+                </select>
+              </div>
+
+              {targetSize === 'custom' && (
+                <div className="setting-group">
+                  <label>{t.max_width_height}</label>
+                  <input
+                    type="number"
+                    value={options.maxWidthOrHeight}
+                    onChange={e => setOptions({ ...options, maxWidthOrHeight: parseInt(e.target.value) })}
+                    step="100"
+                  />
+                </div>
+              )}
+
+              <div className="setting-group">
                 <label>{t.quality} ({Math.round(options.initialQuality * 100)}%)</label>
                 <div className="range-wrapper">
                   <span>{t.quality_low}</span>
@@ -254,15 +341,6 @@ function App() {
                   onChange={e => setOptions({ ...options, maxSizeMB: parseFloat(e.target.value) })}
                   step="0.1"
                   min="0.1"
-                />
-              </div>
-              <div className="setting-group">
-                <label>{t.max_width_height}</label>
-                <input
-                  type="number"
-                  value={options.maxWidthOrHeight}
-                  onChange={e => setOptions({ ...options, maxWidthOrHeight: parseInt(e.target.value) })}
-                  step="100"
                 />
               </div>
               <div className="setting-group">
