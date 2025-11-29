@@ -95,3 +95,23 @@ button:disabled {
     color: #aaa;
   }
 }
+
+@media (max-width: 600px) {
+  #root {
+    padding: 1rem;
+  }
+
+  .card {
+    padding: 1.25rem;
+    border-radius: 12px;
+  }
+
+  .title {
+    font-size: 2.2em;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+}

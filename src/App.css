@@ -84,6 +84,8 @@
   gap: 1rem;
   color: #666;
   pointer-events: none;
+  text-align: center;
+  padding: 1rem;
 }
 
 .upload-icon {
@@ -329,5 +331,69 @@
 
   .lang-btn:hover {
     background-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 600px) {
+  .container {
+    padding-bottom: 6rem;
+  }
+
+  .header {
+    margin-bottom: 2rem;
+    padding-top: 2.5rem;
+    /* Space for top controls */
+  }
+
+  .top-controls {
+    top: -1rem;
+    right: 0;
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .upload-area {
+    min-height: 160px;
+  }
+
+  .settings {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .actions {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .actions button {
+    width: 100%;
+    justify-content: center;
+    padding: 0.8rem;
+  }
+
+  .file-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+
+  .file-info {
+    width: 100%;
+  }
+
+  .file-actions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-left: 0;
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.8rem;
+    margin-top: 0.2rem;
+  }
+
+  .file-meta {
+    flex-wrap: wrap;
+    line-height: 1.4;
   }
 }
